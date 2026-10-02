@@ -90,16 +90,18 @@ The Streamlit dashboard provides demo-data or CSV-upload mode; configurable plan
 ```text
 api/                  FastAPI application
 dashboard/            Streamlit decision-support app
-data/                 Synthetic inputs and generated outputs (ignored by Git)
+data/                 Synthetic inputs and versioned example pipeline outputs
 docs/                 Workflow, methodology, architecture, BI and interview notes
 notebooks/             Guided analysis notebooks
 publication/           Portfolio, resume and LinkedIn drafts
 reports/               Generated PDFs, workbook, slide deck, and SVGs (build on demand)
-scripts/                Reproducible publication-material builder
+scripts/               Publication-material and ZIP builders
 sql/                  PostgreSQL schema and business queries
 src/demand_inventory/ Reusable data, feature, EDA, model and inventory modules
 tests/                 Unit and integration tests
 ```
+
+The packaged archive includes the two named synthetic CSV inputs and `data/example_outputs/`. Local uploads and `data/processed/` are deliberately excluded from the download bundle to avoid accidentally exporting private files.
 
 ## Modeling and assumptions
 
@@ -132,6 +134,20 @@ python scripts/build_publication_assets.py
 ```
 
 The script writes six PDFs (`Complete_Project_Explanation`, `Project_Report`, `Interview_Questions_Answers`, `Project_Workflow`, `Setup_Guide`, `Methodology_Guide`), a four-tab Excel data dictionary, a 12-slide PowerPoint, and three SVG workflow/architecture diagrams into `reports/`. They can be regenerated from the current source and synthetic holdout. The Power BI blueprint is provided separately; a valid `.pbix` must be created and checked in Power BI Desktop.
+
+## Download the complete project ZIP
+
+The repository contains synthetic raw sample data under `data/raw/` and committed, reproducible example outputs under `data/example_outputs/`. To create a clean downloadable ZIP containing source, notebooks, docs, reports, data, and publication files (without `.git`, virtual environments, caches, or local secrets), run:
+
+```powershell
+python scripts/package_project.py
+```
+
+The default archive is created next to the repository as `Demand-Forecasting-Inventory-Optimization-Complete.zip`, with a matching `.sha256` checksum file. The archive itself is intentionally not stored inside Git; it duplicates the full repository. Verify integrity with:
+
+```powershell
+Get-FileHash ..\Demand-Forecasting-Inventory-Optimization-Complete.zip -Algorithm SHA256
+```
 
 ## Detailed explanation and publication
 

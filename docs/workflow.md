@@ -6,7 +6,7 @@ The unit of planning in this demo is SKU-day. Forecast the chosen demand horizon
 
 ## 2. Source and validate data
 
-Input schema is defined in `docs/data-dictionary.md`. The demo generates 540 daily observations for eight synthetic SKUs. Alternatively, pass sales and product CSVs to the CLI or upload them in Streamlit. Validate types, uniqueness, date coverage, missing products, impossible prices, and return/cancellation semantics.
+Input schema is defined in `docs/data-dictionary.md`. The demo generates 540 daily observations for eight synthetic SKUs. Raw inputs and an example end-to-end output snapshot are bundled under `data/`. Alternatively, pass sales and product CSVs to the CLI or upload them in Streamlit. Validate types, uniqueness, date coverage, missing products, impossible prices, and return/cancellation semantics.
 
 ## 3. Transform
 
@@ -42,6 +42,8 @@ docker compose up --build
 ```
 
 Generate the PDF/Excel/PowerPoint/SVG publication package with `pip install -e ".[publication]"` followed by `python scripts/build_publication_assets.py`.
+
+Create a portable source/data/reports bundle with `python scripts/package_project.py`; it writes the ZIP next to the repository and emits a SHA-256 sidecar.
 
 ## Suggested production extensions
 
