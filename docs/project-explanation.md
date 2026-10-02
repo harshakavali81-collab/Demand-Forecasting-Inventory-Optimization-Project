@@ -47,6 +47,8 @@ When stock is below reorder point, a target-stock gap is rounded up and compared
 
 Start with the business question. Explain the input grain and data quality rules; show why a chronological split matters; compare baselines before the ML model; discuss WAPE's zero-demand limitation; then trace one SKU through safety stock and reorder point. End with synthetic data caveats and a production validation plan.
 
+The repository also provides CSV ingestion via CLI and Streamlit, EDA summaries, SQL examples, reproducible notebook walkthroughs, an API, and an optional publication-assets builder that creates PDFs, an Excel dictionary, a slide deck, and SVG diagrams from the implementation.
+
 ## Business value and scope
 
 The system structures conversations around service level, supplier lead time, working capital, and uncertainty. It does not prove cost reduction or guarantee a service improvement. Those outcomes require representative historical backtests and a controlled pilot with actual purchase/stock data.

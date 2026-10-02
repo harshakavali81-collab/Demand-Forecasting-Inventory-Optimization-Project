@@ -30,3 +30,19 @@ def test_end_to_end_service_outputs_decisions_and_scores():
     assert len(result["forecast"]) == 8 * 7
     assert "ALL" in result["metrics"]["sku_id"].values
     assert np.isfinite(result["decisions"]["reorder_point"]).all()
+
+
+def test_service_requires_both_external_input_tables():
+    sales, _ = generate_demo_data(periods=70)
+    with pytest.raises(ValueError, match="both sales and products"):
+        run_project(horizon=7, test_days=7, sales=sales)
+
+
+def test_service_accepts_customer_supplied_csv_dataframes():
+    sales, products = generate_demo_data(periods=70)
+    result = run_project(
+        horizon=7, test_days=7, sales=sales, products=products,
+    )
+    assert len(result["forecast"]) == len(products) * 7
+    assert set(result["sku_summary"]["sku_id"]) == set(products["sku_id"])
+    assert not result["category_summary"].empty

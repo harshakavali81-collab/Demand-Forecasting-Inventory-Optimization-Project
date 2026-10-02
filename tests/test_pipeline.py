@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from demand_inventory.data import generate_demo_data
 from demand_inventory.pipeline import clean_sales, daily_demand
@@ -20,3 +21,17 @@ def test_cleaning_deduplicates_unknown_skus_and_keeps_returns():
     assert cleaned["quantity"].lt(0).any()
     assert "UNKNOWN" not in cleaned["sku_id"].values
     assert not cleaned["order_id"].duplicated().any()
+
+
+def test_empty_cleaned_sales_reports_invalid_input():
+    sales, products = generate_demo_data(periods=40)
+    sales["sku_id"] = "UNKNOWN"
+    with pytest.raises(ValueError, match="No valid sales rows"):
+        clean_sales(sales, products)
+
+
+def test_invalid_holding_cost_is_rejected():
+    sales, products = generate_demo_data(periods=40)
+    products.loc[0, "annual_holding_cost"] = 0
+    with pytest.raises(ValueError, match="annual_holding_cost"):
+        daily_demand(sales, products)

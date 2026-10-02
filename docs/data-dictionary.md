@@ -1,6 +1,6 @@
 # Data dictionary
 
-The demo exposes a transaction table and a SKU assumptions table. Numeric demonstration values are synthetic.
+The demo exposes a transaction table and a SKU assumptions table. Numeric demonstration values are synthetic. The CSV loader accepts these same schemas.
 
 ## Sales transactions
 
@@ -31,3 +31,5 @@ The demo exposes a transaction table and a SKU assumptions table. Numeric demons
 ## Derived output
 
 `demand.csv`: SKU-day floored net units; `forecast.csv`: SKU/date expected units; `metrics.csv`: model, MAE, RMSE, WAPE by SKU and pooled; `decisions.csv`: forecast total, demand statistics, safety stock, reorder point, EOQ, days of supply, suggested order, risk/status, ABC-XYZ segment.
+
+The generated `reports/data_dictionary.xlsx` contains these definitions plus output fields and explicit provenance/assumption notes.

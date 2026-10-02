@@ -18,6 +18,7 @@ st.title("Demand Forecasting & Inventory Optimization")
 st.caption("Synthetic portfolio demo. Review assumptions and recommendations before operational use.")
 
 with st.sidebar:
+    data_source = st.radio("Data source", ["Synthetic demo", "Upload CSV files"])
     st.header("Planning assumptions")
     horizon = st.slider("Forecast horizon (days)", 7, 90, 30, step=1)
     service_level = st.select_slider("Target service level", options=[0.90, 0.95, 0.975, 0.99], value=0.95)
@@ -27,17 +28,42 @@ with st.sidebar:
         ["moving_average_7", "naive", "seasonal_naive", "hist_gradient_boosting"],
     )
 
+sales_input = None
+products_input = None
+if data_source == "Upload CSV files":
+    sales_file = st.file_uploader("Sales transactions CSV", type=["csv"])
+    products_file = st.file_uploader("Products and supplier assumptions CSV", type=["csv"])
+    if sales_file is None or products_file is None:
+        st.info("Upload both CSV files to generate forecasts from your data.")
+        st.stop()
+    try:
+        sales_input = pd.read_csv(sales_file)
+        products_input = pd.read_csv(products_file)
+    except (pd.errors.ParserError, UnicodeDecodeError) as exc:
+        st.error(f"Unable to read the uploaded CSV files: {exc}")
+        st.stop()
+
 
 @st.cache_data(ttl="15m", max_entries=8)
-def load_results(horizon_days: int, target_service: float, supply_days: int, model_name: str):
+def load_results(
+    horizon_days: int, target_service: float, supply_days: int, model_name: str,
+    sales_frame: pd.DataFrame | None, products_frame: pd.DataFrame | None,
+):
     return run_project(
         horizon=horizon_days, service_level=target_service,
         max_days_of_supply=supply_days, forecast_model=model_name,
+        sales=sales_frame, products=products_frame,
     )
 
 
-with st.spinner("Preparing demo demand, comparing forecasts, and calculating stock policies..."):
-    results = load_results(horizon, service_level, days_cover, forecast_model)
+try:
+    with st.spinner("Validating data, evaluating forecasts, and calculating stock policies..."):
+        results = load_results(
+            horizon, service_level, days_cover, forecast_model, sales_input, products_input
+        )
+except (ValueError, KeyError) as exc:
+    st.error(f"Could not run the planning workflow: {exc}")
+    st.stop()
 
 decisions = results["decisions"]
 forecast = results["forecast"]
@@ -54,8 +80,8 @@ with st.container(horizontal=True):
     wape = selected_metrics["wape"]
     st.metric("Holdout WAPE", "N/A" if pd.isna(wape) else f"{wape:.1%}", border=True)
 
-tab_overview, tab_forecast, tab_inventory, tab_models = st.tabs(
-    ["Overview", "Forecast", "Inventory decisions", "Model evaluation"]
+tab_overview, tab_eda, tab_forecast, tab_inventory, tab_models = st.tabs(
+    ["Overview", "Demand exploration", "Forecast", "Inventory decisions", "Model evaluation"]
 )
 
 with tab_overview:
@@ -73,6 +99,23 @@ with tab_overview:
     )
     st.subheader("Recommended replenishment by category")
     st.bar_chart(category_summary, x="category", y="order_units")
+
+with tab_eda:
+    st.subheader("SKU demand profile")
+    summary = results["sku_summary"].sort_values("total_units", ascending=False)
+    st.dataframe(summary, hide_index=True)
+    eda_left, eda_right = st.columns(2)
+    with eda_left:
+        st.markdown("**Historical demand by category**")
+        st.bar_chart(results["category_summary"], x="category", y="total_units")
+    with eda_right:
+        st.markdown("**Daily units by weekday**")
+        weekday = results["demand"].assign(
+            day_of_week=results["demand"]["date"].dt.day_name()
+        ).groupby("day_of_week", as_index=False)["demand"].mean()
+        weekday_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        weekday["sort"] = weekday["day_of_week"].map({day: i for i, day in enumerate(weekday_order)})
+        st.bar_chart(weekday.sort_values("sort"), x="day_of_week", y="demand")
 
 with tab_forecast:
     selected = st.selectbox("Select SKU", sorted(forecast["sku_id"].unique()))

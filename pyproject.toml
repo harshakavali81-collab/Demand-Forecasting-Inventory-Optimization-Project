@@ -8,6 +8,13 @@ version = "1.0.0"
 description = "Reproducible demand forecasting and inventory decision-support portfolio project"
 requires-python = ">=3.10"
 
+[project.optional-dependencies]
+publication = [
+    "openpyxl>=3.1,<4",
+    "python-pptx>=1.0,<2",
+    "reportlab>=4.1,<6",
+]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 

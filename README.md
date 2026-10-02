@@ -57,6 +57,16 @@ streamlit run dashboard/app.py
 
 If `py` is unavailable, create the virtual environment using an installed Python executable. The CLI writes forecasts, evaluation scores, cleaned demand, and inventory decisions under `data/processed/`.
 
+### Run with your own data
+
+Provide two CSV files. The sales CSV must contain `order_id,order_date,sku_id,quantity,unit_price,discount,promotion`; the products CSV must contain `sku_id,product_name,category,unit_cost,current_stock,lead_time_days,minimum_order_quantity,order_cost,annual_holding_cost`. Dates should be parseable; returns may be negative quantities. Use the CLI:
+
+```powershell
+python -m demand_inventory.cli --sales-csv data/raw/sales.csv --products-csv data/raw/products.csv --horizon 30 --output-dir data/processed
+```
+
+Or select **Upload CSV files** in the Streamlit sidebar and upload both tables. Validate the business meaning of on-hand stock, order costs, returns, and lead times before relying on any output.
+
 Run checks:
 
 ```powershell
@@ -73,7 +83,7 @@ Open `http://127.0.0.1:8000/docs`.
 
 ## Application features
 
-The Streamlit dashboard provides configurable planning horizon, service level, and days-of-supply target; category/SKU/risk filters; historical demand and forecast charts; model evaluation; inventory KPIs; and downloadable recommendation CSV. The FastAPI service exposes health and demo decision endpoints.
+The Streamlit dashboard provides demo-data or CSV-upload mode; configurable planning horizon, service level, days-of-supply target, and forecast model; category/SKU/risk filters; historical demand and forecast charts; model evaluation; inventory KPIs; and downloadable recommendation CSV. The FastAPI service exposes health and synthetic-demo decision endpoints.
 
 ## Structure
 
@@ -84,8 +94,10 @@ data/                 Synthetic inputs and generated outputs (ignored by Git)
 docs/                 Workflow, methodology, architecture, BI and interview notes
 notebooks/             Guided analysis notebooks
 publication/           Portfolio, resume and LinkedIn drafts
+reports/               Generated PDFs, workbook, slide deck, and SVGs (build on demand)
+scripts/                Reproducible publication-material builder
 sql/                  PostgreSQL schema and business queries
-src/demand_inventory/ Reusable data, feature, model and inventory modules
+src/demand_inventory/ Reusable data, feature, EDA, model and inventory modules
 tests/                 Unit and integration tests
 ```
 
@@ -109,6 +121,17 @@ docker compose up --build
 ```
 
 The compose stack starts the dashboard and a local PostgreSQL service. The demo pipeline is file-based and does not require a database connection.
+
+## Generated publication package
+
+Install the optional document-generation dependencies and build the PDF manuals/report, Excel data dictionary, 12-slide PowerPoint, and SVG diagrams:
+
+```powershell
+pip install -e ".[publication]"
+python scripts/build_publication_assets.py
+```
+
+The script writes six PDFs (`Complete_Project_Explanation`, `Project_Report`, `Interview_Questions_Answers`, `Project_Workflow`, `Setup_Guide`, `Methodology_Guide`), a four-tab Excel data dictionary, a 12-slide PowerPoint, and three SVG workflow/architecture diagrams into `reports/`. They can be regenerated from the current source and synthetic holdout. The Power BI blueprint is provided separately; a valid `.pbix` must be created and checked in Power BI Desktop.
 
 ## Detailed explanation and publication
 
