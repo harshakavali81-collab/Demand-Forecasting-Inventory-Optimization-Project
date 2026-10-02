@@ -1,0 +1,17 @@
+.venv/
+venv/
+*.egg-info/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.env
+.streamlit/secrets.toml
+data/processed/*
+!data/processed/.gitkeep
+models/*
+!models/.gitkeep
+*.log
+.DS_Store
+Thumbs.db
